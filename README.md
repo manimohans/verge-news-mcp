@@ -12,7 +12,7 @@ An MCP server that provides tools to fetch and search news from The Verge's RSS 
 
 ```bash
 # Clone the repository
-git clone https://github.com/yourusername/verge-news-mcp.git
+git clone https://github.com/manimohans/verge-news-mcp.git
 cd verge-news-mcp
 
 # Install dependencies
@@ -63,7 +63,7 @@ npm install -g @anthropic-ai/smithery
 
 2. To use this server via Smithery, run:
 ```bash
-smithery use https://github.com/yourusername/verge-news-mcp
+smithery use https://github.com/manimohans/verge-news-mcp
 ```
 
 3. Once installed, you can use it with Claude or any other MCP-compatible application.
