@@ -1,4 +1,5 @@
 # The Verge News MCP Server
+[![smithery badge](https://smithery.ai/badge/@manimohans/verge-news-mcp)](https://smithery.ai/server/@manimohans/verge-news-mcp)
 
 An MCP server that provides tools to fetch and search news from The Verge's RSS feed.
 
@@ -10,15 +11,24 @@ An MCP server that provides tools to fetch and search news from The Verge's RSS 
 
 ## Installation
 
+### Installing via Smithery
+
+To install the Verge News MCP Server for Claude Desktop automatically via [Smithery](https://smithery.ai/server/@manimohans/verge-news-mcp):
+
 ```bash
-# Clone the repository
+npx -y @smithery/cli install @manimohans/verge-news-mcp --client claude
+```
+
+### Manual Installation
+```bash
+#Clone the repository
 git clone https://github.com/manimohans/verge-news-mcp.git
 cd verge-news-mcp
 
-# Install dependencies
+#Install dependencies
 npm install
 
-# Build the project
+#Build the project
 npm run build
 ```
 
