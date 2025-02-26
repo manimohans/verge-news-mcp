@@ -6,6 +6,18 @@ build:
   type: docker
   dockerfile: Dockerfile
 
+startCommand:
+  type: stdio
+  configSchema: {}
+  commandFunction: |
+    function(config) {
+      return {
+        command: "node",
+        args: ["build/index.js"],
+        env: {}
+      };
+    }
+
 capabilities:
   tools:
     - name: get-daily-news
