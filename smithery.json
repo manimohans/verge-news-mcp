@@ -1,0 +1,30 @@
+{
+  "name": "verge-news-mcp",
+  "description": "MCP server for The Verge news RSS feed",
+  "version": "1.0.0",
+  "main": "build/index.js",
+  "scripts": {
+    "build": "npm install && tsc",
+    "start": "node build/index.js"
+  },
+  "capabilities": {
+    "tools": [
+      {
+        "name": "get-daily-news",
+        "description": "Get the latest news from The Verge for today"
+      },
+      {
+        "name": "get-weekly-news",
+        "description": "Get the latest news from The Verge for the past week"
+      },
+      {
+        "name": "search-news",
+        "description": "Search for news articles from The Verge by keyword",
+        "parameters": {
+          "keyword": "string",
+          "days": "number?"
+        }
+      }
+    ]
+  }
+} 
