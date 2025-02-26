@@ -5,7 +5,7 @@ An MCP server that provides tools to fetch and search news from The Verge's RSS 
 ## Features
 
 - Fetch today's news from The Verge
-- Fetch the past week's news from The Verge
+- Fetch a random selection of news from The Verge's past week
 - Search for news articles by keyword
 
 ## Installation
@@ -82,6 +82,8 @@ Fetches news articles from The Verge published in the last 7 days.
 
 Example query: "Show me The Verge's news from the past week."
 
+**Note:** This tool randomly selects 10 news items from the past week, providing variety each time it's used.
+
 #### search-news
 
 Searches for news articles containing a specific keyword.
@@ -101,4 +103,4 @@ npm run dev
 
 ## License
 
-ISC 
+ISC
