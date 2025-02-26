@@ -68,6 +68,15 @@ smithery use https://github.com/manimohans/verge-news-mcp
 
 3. Once installed, you can use it with Claude or any other MCP-compatible application.
 
+#### Smithery Configuration
+
+This repository includes the necessary configuration files for Smithery:
+
+- `Dockerfile`: Defines how to build the Docker container for the MCP server
+- `smithery.yaml`: Configures the MCP server for Smithery, including its capabilities
+
+For more information about Smithery configuration, see the [Smithery documentation](https://smithery.ai/docs/config).
+
 ### Available Tools
 
 #### get-daily-news
