@@ -84,7 +84,7 @@ ${index + 1}. ${item.title}
   }).join("\n---\n");
 }
 
-// New helper function to format news as brief summaries
+// Helper function to format news as brief summaries
 function formatNewsAsBriefSummary(items: ReturnType<typeof formatNewsItems>, limit: number = 10) {
   if (items.length === 0) {
     return "No news articles found for the specified time period.";
@@ -103,6 +103,33 @@ ${index + 1}. ${item.title}
    Summary: ${summary}
    `;
   }).join("\n---\n");
+}
+
+// Helper function to randomly select news items
+function getRandomNewsItems(items: Parser.Item[], count: number = 10) {
+  if (items.length <= count) {
+    return items; // Return all items if there are fewer than requested
+  }
+  
+  // Create a copy of the array to avoid modifying the original
+  const itemsCopy = [...items];
+  const result: Parser.Item[] = [];
+  
+  // Randomly select 'count' items
+  for (let i = 0; i < count; i++) {
+    if (itemsCopy.length === 0) break;
+    
+    // Get a random index
+    const randomIndex = Math.floor(Math.random() * itemsCopy.length);
+    
+    // Add the randomly selected item to the result
+    result.push(itemsCopy[randomIndex]);
+    
+    // Remove the selected item to avoid duplicates
+    itemsCopy.splice(randomIndex, 1);
+  }
+  
+  return result;
 }
 
 // Main function to start the server
@@ -152,14 +179,18 @@ async function main() {
         try {
           const allNews = await fetchVergeNews();
           const weeklyNews = filterNewsByDate(allNews, 7); // Last 7 days
-          const formattedNews = formatNewsItems(weeklyNews);
-          const newsText = formatNewsAsBriefSummary(formattedNews, 10); // Also update weekly news to use brief summaries
+          
+          // Randomly select 10 news items from the past week
+          const randomWeeklyNews = getRandomNewsItems(weeklyNews, 10);
+          
+          const formattedNews = formatNewsItems(randomWeeklyNews);
+          const newsText = formatNewsAsBriefSummary(formattedNews);
           
           return {
             content: [
               {
                 type: "text",
-                text: `# The Verge - Weekly News\n\n${newsText}`
+                text: `# The Verge - Random Weekly News\n\n${newsText}`
               }
             ]
           };
