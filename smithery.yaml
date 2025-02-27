@@ -10,7 +10,7 @@ startCommand:
   type: stdio
   configSchema: {}
   commandFunction: |
-    function(config) {
+    (config) => {
       return {
         command: "node",
         args: ["build/index.js"],
