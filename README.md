@@ -4,6 +4,10 @@
 
 An MCP server that provides tools to fetch and search news from The Verge's RSS feed.
 
+<a href="https://glama.ai/mcp/servers/n6lbwdnbxa">
+  <img width="380" height="200" src="https://glama.ai/mcp/servers/n6lbwdnbxa/badge" alt="The Verge News Server MCP server" />
+</a>
+
 ## Features
 
 - Fetch today's news from The Verge
