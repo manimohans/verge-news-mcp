@@ -1,3 +1,5 @@
+[![MseeP.ai Security Assessment Badge](https://mseep.net/pr/manimohans-verge-news-mcp-badge.png)](https://mseep.ai/app/manimohans-verge-news-mcp)
+
 # The Verge News MCP Server
 
 [![smithery badge](https://smithery.ai/badge/@manimohans/verge-news-mcp)](https://smithery.ai/server/@manimohans/verge-news-mcp)
