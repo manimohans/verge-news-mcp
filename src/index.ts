@@ -7,16 +7,8 @@ import Parser from "rss-parser";
 const parser = new Parser();
 const VERGE_RSS_URL = "https://www.theverge.com/rss/index.xml";
 
-// Create MCP server with all capabilities
-const server = new McpServer({
-  name: "verge-news",
-  version: "1.0.0",
-  capabilities: {
-    tools: {},
-    resources: {},
-    prompts: {}
-  }
-});
+// Configuration schema (optional, can be empty)
+export const configSchema = z.object({});
 
 // Helper function to fetch and parse RSS feed
 async function fetchVergeNews() {
@@ -132,157 +124,179 @@ function getRandomNewsItems(items: Parser.Item[], count: number = 10) {
   return result;
 }
 
-// Main function to start the server
-async function main() {
-  try {
-    // Register tool for daily news
-    server.tool(
-      "get-daily-news",
-      "Get the latest news from The Verge for today",
-      {},
-      async () => {
-        try {
-          const allNews = await fetchVergeNews();
-          const todayNews = filterNewsByDate(allNews, 1); // Last 24 hours
-          const formattedNews = formatNewsItems(todayNews);
-          const newsText = formatNewsAsBriefSummary(formattedNews, 10); // Limit to 10 items with brief summaries
-          
-          return {
-            content: [
-              {
-                type: "text",
-                text: `# The Verge - Today's News\n\n${newsText}`
-              }
-            ]
-          };
-        } catch (error) {
-          console.error("Error in get-daily-news:", error);
-          return {
-            content: [
-              {
-                type: "text",
-                text: `Error fetching daily news: ${error instanceof Error ? error.message : String(error)}`
-              }
-            ],
-            isError: true
-          };
-        }
-      }
-    );
-    
-    // Register tool for weekly news
-    server.tool(
-      "get-weekly-news",
-      "Get the latest news from The Verge for the past week",
-      {},
-      async () => {
-        try {
-          const allNews = await fetchVergeNews();
-          const weeklyNews = filterNewsByDate(allNews, 7); // Last 7 days
-          
-          // Randomly select 10 news items from the past week
-          const randomWeeklyNews = getRandomNewsItems(weeklyNews, 10);
-          
-          const formattedNews = formatNewsItems(randomWeeklyNews);
-          const newsText = formatNewsAsBriefSummary(formattedNews);
-          
-          return {
-            content: [
-              {
-                type: "text",
-                text: `# The Verge - Random Weekly News\n\n${newsText}`
-              }
-            ]
-          };
-        } catch (error) {
-          console.error("Error in get-weekly-news:", error);
-          return {
-            content: [
-              {
-                type: "text",
-                text: `Error fetching weekly news: ${error instanceof Error ? error.message : String(error)}`
-              }
-            ],
-            isError: true
-          };
-        }
-      }
-    );
-    
-    // Register tool for searching news by keyword
-    server.tool(
-      "search-news",
-      "Search for news articles from The Verge by keyword",
-      {
-        keyword: z.string().describe("Keyword to search for in news articles"),
-        days: z.number().optional().describe("Number of days to look back (default: 30)")
-      },
-      async ({ keyword, days = 30 }) => {
-        try {
-          const allNews = await fetchVergeNews();
-          const filteredByDate = filterNewsByDate(allNews, days);
-          const filteredByKeyword = filterNewsByKeyword(filteredByDate, keyword);
-          const formattedNews = formatNewsItems(filteredByKeyword);
-          const newsText = formatNewsAsBriefSummary(formattedNews, 10); // Use brief summary format with limit of 10
-          
-          return {
-            content: [
-              {
-                type: "text",
-                text: `# The Verge - Search Results for "${keyword}"\n\n${newsText}`
-              }
-            ]
-          };
-        } catch (error) {
-          console.error("Error in search-news:", error);
-          return {
-            content: [
-              {
-                type: "text",
-                text: `Error searching news: ${error instanceof Error ? error.message : String(error)}`
-              }
-            ],
-            isError: true
-          };
-        }
-      }
-    );
-    
-    // Then implement resource handlers
-    server.resource(
-      "news-archive",
-      "news://archive",
-      async (uri) => ({
-        contents: [{
-          uri: uri.href,
-          text: "This would be an archive of news articles"
-        }]
-      })
-    );
+// Main server creation function
+export default function createServer({
+  config,
+}: {
+  config: z.infer<typeof configSchema>;
+}) {
+  // Create MCP server with all capabilities
+  const server = new McpServer({
+    name: "verge-news",
+    version: "1.0.0",
+    capabilities: {
+      tools: {},
+      resources: {},
+      prompts: {}
+    }
+  });
 
-    // And prompt handlers
-    server.prompt(
-      "news-summary",
-      "Summarize news from The Verge for a specified period",
-      {
-        days: z.string().optional().describe("Number of days to summarize (default: 7)")
-      },
-      (args, extra) => {
-        const days = args.days ? parseInt(args.days, 10) : 7;
+  // Register tool for daily news
+  server.tool(
+    "get-daily-news",
+    "Get the latest news from The Verge for today",
+    {},
+    async () => {
+      try {
+        const allNews = await fetchVergeNews();
+        const todayNews = filterNewsByDate(allNews, 1); // Last 24 hours
+        const formattedNews = formatNewsItems(todayNews);
+        const newsText = formatNewsAsBriefSummary(formattedNews, 10); // Limit to 10 items with brief summaries
         
         return {
-          messages: [{
-            role: "user",
-            content: {
+          content: [
+            {
               type: "text",
-              text: `Please summarize the news from the past ${days} days.`
+              text: `# The Verge - Today's News\n\n${newsText}`
             }
-          }]
+          ]
+        };
+      } catch (error) {
+        console.error("Error in get-daily-news:", error);
+        return {
+          content: [
+            {
+              type: "text",
+              text: `Error fetching daily news: ${error instanceof Error ? error.message : String(error)}`
+            }
+          ],
+          isError: true
         };
       }
-    );
+    }
+  );
+  
+  // Register tool for weekly news
+  server.tool(
+    "get-weekly-news",
+    "Get the latest news from The Verge for the past week",
+    {},
+    async () => {
+      try {
+        const allNews = await fetchVergeNews();
+        const weeklyNews = filterNewsByDate(allNews, 7); // Last 7 days
+        
+        // Randomly select 10 news items from the past week
+        const randomWeeklyNews = getRandomNewsItems(weeklyNews, 10);
+        
+        const formattedNews = formatNewsItems(randomWeeklyNews);
+        const newsText = formatNewsAsBriefSummary(formattedNews);
+        
+        return {
+          content: [
+            {
+              type: "text",
+              text: `# The Verge - Random Weekly News\n\n${newsText}`
+            }
+          ]
+        };
+      } catch (error) {
+        console.error("Error in get-weekly-news:", error);
+        return {
+          content: [
+            {
+              type: "text",
+              text: `Error fetching weekly news: ${error instanceof Error ? error.message : String(error)}`
+            }
+          ],
+          isError: true
+        };
+      }
+    }
+  );
+  
+  // Register tool for searching news by keyword
+  server.tool(
+    "search-news",
+    "Search for news articles from The Verge by keyword",
+    {
+      keyword: z.string().describe("Keyword to search for in news articles"),
+      days: z.number().optional().describe("Number of days to look back (default: 30)")
+    },
+    async ({ keyword, days = 30 }) => {
+      try {
+        const allNews = await fetchVergeNews();
+        const filteredByDate = filterNewsByDate(allNews, days);
+        const filteredByKeyword = filterNewsByKeyword(filteredByDate, keyword);
+        const formattedNews = formatNewsItems(filteredByKeyword);
+        const newsText = formatNewsAsBriefSummary(formattedNews, 10); // Use brief summary format with limit of 10
+        
+        return {
+          content: [
+            {
+              type: "text",
+              text: `# The Verge - Search Results for "${keyword}"\n\n${newsText}`
+            }
+          ]
+        };
+      } catch (error) {
+        console.error("Error in search-news:", error);
+        return {
+          content: [
+            {
+              type: "text",
+              text: `Error searching news: ${error instanceof Error ? error.message : String(error)}`
+            }
+          ],
+          isError: true
+        };
+      }
+    }
+  );
+  
+  // Then implement resource handlers
+  server.resource(
+    "news-archive",
+    "news://archive",
+    async (uri) => ({
+      contents: [{
+        uri: uri.href,
+        text: "This would be an archive of news articles"
+      }]
+    })
+  );
+
+  // And prompt handlers
+  server.prompt(
+    "news-summary",
+    "Summarize news from The Verge for a specified period",
+    {
+      days: z.string().optional().describe("Number of days to summarize (default: 7)")
+    },
+    (args, extra) => {
+      const days = args.days ? parseInt(args.days, 10) : 7;
+      
+      return {
+        messages: [{
+          role: "user",
+          content: {
+            type: "text",
+            text: `Please summarize the news from the past ${days} days.`
+          }
+        }]
+      };
+    }
+  );
+
+  return server;
+}
+
+// Optional: Main function for backwards compatibility and local testing
+async function main() {
+  try {
+    const server = createServer({ config: {} });
     
-    // Connect to transport
+    // Connect to transport for local testing
     const transport = new StdioServerTransport();
     await server.connect(transport);
     console.error("Verge News MCP Server running on stdio");
@@ -292,7 +306,10 @@ async function main() {
   }
 }
 
-main().catch((error) => {
-  console.error("Unhandled error:", error);
-  process.exit(1);
-}); 
+// Only run main if this file is executed directly
+if (import.meta.url === `file://${process.argv[1]}`) {
+  main().catch((error) => {
+    console.error("Unhandled error:", error);
+    process.exit(1);
+  });
+}

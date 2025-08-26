@@ -3,20 +3,7 @@ description: MCP server for The Verge news RSS feed
 version: 1.0.0
 
 build:
-  type: docker
-  dockerfile: Dockerfile
-
-startCommand:
-  type: stdio
-  configSchema: {}
-  commandFunction: |
-    (config) => {
-      return {
-        command: "node",
-        args: ["build/index.js"],
-        env: {}
-      };
-    }
+  type: node
 
 capabilities:
   tools:
@@ -30,4 +17,4 @@ capabilities:
       description: Search for news articles from The Verge by keyword
       parameters:
         keyword: string
-        days: number? 
+        days: number?
