@@ -306,8 +306,8 @@ async function main() {
   }
 }
 
-// Only run main if this file is executed directly
-if (import.meta.url === `file://${process.argv[1]}`) {
+// Only run main if this file is executed directly (for local testing)
+if (process.argv[1] && process.argv[1].endsWith('index.js')) {
   main().catch((error) => {
     console.error("Unhandled error:", error);
     process.exit(1);
