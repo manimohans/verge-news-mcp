@@ -1,7 +1,5 @@
 # The Verge News MCP Server
 
-[![smithery badge](https://smithery.ai/badge/@manimohans/verge-news-mcp)](https://smithery.ai/server/@manimohans/verge-news-mcp)
-
 An MCP server that provides tools to fetch and search news from The Verge's RSS feed.
 
 <a href="https://glama.ai/mcp/servers/n6lbwdnbxa">
