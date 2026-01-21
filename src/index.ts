@@ -3,21 +3,34 @@ import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js"
 import { z } from "zod";
 import Parser from "rss-parser";
 
-// Initialize RSS parser
-const parser = new Parser();
+// Initialize RSS parser with browser-like headers to avoid access denied issues
+const parser = new Parser({
+  headers: {
+    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+    'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8',
+    'Accept-Language': 'en-US,en;q=0.9',
+    'Cache-Control': 'no-cache',
+    'Pragma': 'no-cache'
+  },
+  timeout: 15000
+});
+
+// The Verge RSS feed URL
 const VERGE_RSS_URL = "https://www.theverge.com/rss/index.xml";
+const RSS_SOURCE_NAME = "The Verge";
 
 // Configuration schema (optional, can be empty)
 export const configSchema = z.object({});
 
 // Helper function to fetch and parse RSS feed
-async function fetchVergeNews() {
+async function fetchNews(): Promise<Parser.Item[]> {
   try {
     const feed = await parser.parseURL(VERGE_RSS_URL);
-    return feed.items;
+    return feed.items || [];
   } catch (error) {
     console.error("Error fetching RSS feed:", error);
-    throw new Error("Failed to fetch news from The Verge");
+    const errorMessage = error instanceof Error ? error.message : String(error);
+    throw new Error(`Failed to fetch news from ${RSS_SOURCE_NAME}: ${errorMessage}`);
   }
 }
 
@@ -144,20 +157,20 @@ export default function createServer({
   // Register tool for daily news
   server.tool(
     "get-daily-news",
-    "Get the latest news from The Verge for today",
+    `Get the latest tech news from ${RSS_SOURCE_NAME} for today`,
     {},
     async () => {
       try {
-        const allNews = await fetchVergeNews();
+        const allNews = await fetchNews();
         const todayNews = filterNewsByDate(allNews, 1); // Last 24 hours
         const formattedNews = formatNewsItems(todayNews);
         const newsText = formatNewsAsBriefSummary(formattedNews, 10); // Limit to 10 items with brief summaries
-        
+
         return {
           content: [
             {
               type: "text",
-              text: `# The Verge - Today's News\n\n${newsText}`
+              text: `# ${RSS_SOURCE_NAME} - Today's News\n\n${newsText}`
             }
           ]
         };
@@ -175,28 +188,28 @@ export default function createServer({
       }
     }
   );
-  
+
   // Register tool for weekly news
   server.tool(
     "get-weekly-news",
-    "Get the latest news from The Verge for the past week",
+    `Get the latest tech news from ${RSS_SOURCE_NAME} for the past week`,
     {},
     async () => {
       try {
-        const allNews = await fetchVergeNews();
+        const allNews = await fetchNews();
         const weeklyNews = filterNewsByDate(allNews, 7); // Last 7 days
-        
+
         // Randomly select 10 news items from the past week
         const randomWeeklyNews = getRandomNewsItems(weeklyNews, 10);
-        
+
         const formattedNews = formatNewsItems(randomWeeklyNews);
         const newsText = formatNewsAsBriefSummary(formattedNews);
-        
+
         return {
           content: [
             {
               type: "text",
-              text: `# The Verge - Random Weekly News\n\n${newsText}`
+              text: `# ${RSS_SOURCE_NAME} - Weekly News Highlights\n\n${newsText}`
             }
           ]
         };
@@ -214,28 +227,28 @@ export default function createServer({
       }
     }
   );
-  
+
   // Register tool for searching news by keyword
   server.tool(
     "search-news",
-    "Search for news articles from The Verge by keyword",
+    `Search for news articles from ${RSS_SOURCE_NAME} by keyword`,
     {
       keyword: z.string().describe("Keyword to search for in news articles"),
       days: z.number().optional().describe("Number of days to look back (default: 30)")
     },
-    async ({ keyword, days = 30 }) => {
+    async ({ keyword, days = 30 }: { keyword: string; days?: number }) => {
       try {
-        const allNews = await fetchVergeNews();
+        const allNews = await fetchNews();
         const filteredByDate = filterNewsByDate(allNews, days);
         const filteredByKeyword = filterNewsByKeyword(filteredByDate, keyword);
         const formattedNews = formatNewsItems(filteredByKeyword);
         const newsText = formatNewsAsBriefSummary(formattedNews, 10); // Use brief summary format with limit of 10
-        
+
         return {
           content: [
             {
               type: "text",
-              text: `# The Verge - Search Results for "${keyword}"\n\n${newsText}`
+              text: `# ${RSS_SOURCE_NAME} - Search Results for "${keyword}"\n\n${newsText}`
             }
           ]
         };
@@ -253,12 +266,12 @@ export default function createServer({
       }
     }
   );
-  
+
   // Then implement resource handlers
   server.resource(
     "news-archive",
     "news://archive",
-    async (uri) => ({
+    async (uri: URL) => ({
       contents: [{
         uri: uri.href,
         text: "This would be an archive of news articles"
@@ -269,19 +282,19 @@ export default function createServer({
   // And prompt handlers
   server.prompt(
     "news-summary",
-    "Summarize news from The Verge for a specified period",
+    `Summarize news from ${RSS_SOURCE_NAME} for a specified period`,
     {
       days: z.string().optional().describe("Number of days to summarize (default: 7)")
     },
-    (args, extra) => {
+    (args: { days?: string }) => {
       const days = args.days ? parseInt(args.days, 10) : 7;
-      
+
       return {
         messages: [{
           role: "user",
           content: {
             type: "text",
-            text: `Please summarize the news from the past ${days} days.`
+            text: `Please summarize the news from ${RSS_SOURCE_NAME} from the past ${days} days.`
           }
         }]
       };
@@ -295,7 +308,7 @@ export default function createServer({
 async function main() {
   try {
     const server = createServer({ config: {} });
-    
+
     // Connect to transport for local testing
     const transport = new StdioServerTransport();
     await server.connect(transport);
@@ -306,8 +319,12 @@ async function main() {
   }
 }
 
-// Only run main if this file is executed directly (for local testing)
-if (process.argv[1] && process.argv[1].endsWith('index.js')) {
+// Run main if this file is executed directly (for local testing)
+// Handles both compiled .js and dev .ts execution
+const isMainModule = process.argv[1] &&
+  (process.argv[1].endsWith('index.js') || process.argv[1].endsWith('index.ts'));
+
+if (isMainModule) {
   main().catch((error) => {
     console.error("Unhandled error:", error);
     process.exit(1);
