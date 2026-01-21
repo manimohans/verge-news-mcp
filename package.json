@@ -22,7 +22,6 @@
   "license": "ISC",
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.6.0",
-    "openai": "^4.28.0",
     "rss-parser": "^3.13.0",
     "zod": "^3.24.2"
   },
