@@ -1,3 +1,5 @@
+[![MseeP.ai Security Assessment Badge](https://mseep.net/pr/manimohans-verge-news-mcp-badge.png)](https://mseep.ai/app/manimohans-verge-news-mcp)
+
 # The Verge News MCP Server
 
 An MCP server that provides tools to fetch and search news from The Verge's RSS feed.
